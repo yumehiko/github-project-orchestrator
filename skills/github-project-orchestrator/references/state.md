@@ -1,79 +1,80 @@
-# GitHubでの管理と再開
+# GitHub state and resumption
 
-実行単位はIssueとし、管理情報は下表に分担させる。リポジトリ内外にTODO.md、JSON等の別のタスク台帳を作らない。セッション内の一時メモはよいが、再開情報はGitHubへ残す。
+Use Issues as execution units and assign authoritative records as follows. Do not create a competing TODO.md, JSON ledger, or other task database inside or outside the repository. Ephemeral session notes are fine; keep resumption information on GitHub.
 
-| 情報 | 正本 |
+| Information | Authoritative record |
 | --- | --- |
-| 目的・設計・受け入れ条件・仕様版 | タスクIssue本文 |
-| 親子関係 / 実行の依存関係 | Sub-issues / Issue dependencies |
-| 進行状態・優先順位・予定 | 指定したProjectのフィールド |
-| 到達目標・所属 | Milestoneの説明 / IssueのMilestone |
-| 横断的な判断の経緯 | Discussion。単一Issueの小さな判断はIssueコメント |
-| 実装・検証・レビュー | PR。PRがない段階はIssueコメント |
-| 判断権限・運用設定・再開入口 | 管理用Issue |
+| Goal, design, acceptance criteria, specification revision | Task Issue body |
+| Parent/child relationships and execution dependencies | Sub-issues / Issue dependencies |
+| Progress, priority, schedule | Fields in the designated Project |
+| Delivery targets and membership | Milestone description / Issue milestone |
+| Cross-task decisions and rationale | Discussion; Issue comments for small local decisions |
+| Implementation, validation, review | PR; Issue comments before a PR exists |
+| Decision authority, operating configuration, resume entry point | Coordination Issue |
 
-## 開始時の設定
+## Initial setup
 
-既存のepicや管理用Issue、関連Project・Milestoneを調べて再利用する。複数の候補から特定できない場合だけ質問する。新しいProjectは大規模・複数タスクの管理に有益な場合に作り、小さな単独タスクに全機能を強制しない。既存の所有者、フィールド、ビュー、命名を尊重する。作成前に公開範囲を確認し、private repoの情報を公開Project等へ露出させない。
+Find and reuse existing epics, coordination Issues, Projects, and Milestones. Ask only when the intended one is ambiguous. Create a Project when it helps manage substantial work; do not force every feature onto a small task. Respect existing ownership, fields, views, and naming. Check destination visibility before creation so private repository information is not exposed through a public Project.
 
-管理用Issueはタスク全件の一覧を複製せず、運用設定とリンクを短く残す。
+Keep the coordination Issue concise, with settings and links rather than a duplicate task inventory:
 
 ```markdown
 ## Architect coordination
-- Scope: 対象Issue・全体の完了条件
-- Base / Merge method: branch / repository convention
+- Scope: Target Issues and overall completion criteria
+- Base / Merge method: Branch and repository convention
 - Merge decision: architect | user
-- Authorization: 対象・公開先・許可された操作と範囲、指示の根拠
-- Project: URL、使用するStatusフィールドと状態の対応（未使用なら理由）
-- Roadmap / Work / Decisions: ビューまたは関連Issue・Discussionへのリンク
-- Fallback: 利用不可の機能と代替の正本（ある場合のみ）
+- Authorization: Target, destination, permitted operations, limits, and instruction basis
+- Project: URL and state-to-field mapping, or reason for not using one
+- Roadmap / Work / Decisions: Links to views, Issues, and Discussions
+- Model policy: Host capabilities, user constraints, assignment rationale and fallbacks
+- Fallback: Unavailable features and substitute authoritative records, if any
 - Updated: ISO timestamp
 
 ### Resume
-- 次の具体的な行動・未解決の質問・現在有効な決定へのリンク。
-- userモードの承認対象PR・SHA・仕様版と承認記録。
+- Next concrete action, unresolved questions, and current decision links.
+- In user mode: PR, SHA, specification revision, and approval record.
 ```
 
-履歴はコメントに残し、本文には現在有効な情報だけを置く。更新前に最新内容を読み、他の人の編集を保持する。古い「未着手」「次は〜」を追記で残さない。担当の役割・論理名を記録し、セッション固有agent ID、ローカル絶対パス、秘密情報は公開しない。
+Keep history in comments and only current information in the body. Read the latest version before editing and preserve others' changes. Replace stale status rather than appending contradictory instructions. Record logical worker roles; do not publish session-specific agent IDs, local absolute paths, or secrets. Put task-specific model assignments in the task's record rather than duplicating them throughout the Project.
 
-## ProjectsとMilestones
+## Projects and Milestones
 
-Projectには実タスクIssueを追加し、同じタスクのPRを別の進捗項目として二重計上しない。draft itemから実行を始めず、まずIssueにする。利用するProjectを一つ正本に指定し、他のProjectへ独自に状態を複製しない。
+Add actual task Issues to the Project; do not count their PRs as separate progress items. Convert draft items to Issues before execution. Designate one authoritative Project and avoid independently duplicating status elsewhere.
 
-最初はStatusとPriority、必要ならHorizon（Now / Next / Later）を使う。Tableで全体、Boardで実行状況を確認する。日程が決まった仕事だけStart/Target dateまたはIterationでRoadmapを作り、見栄えのために期限を捏造しない。全体のRoadmapは親Issueを中心に、日々のWorkは実装単位を中心に表示する。ビューの作成・設定に対応したツールがなければ、利用可能なTable等で運用し、未設定を伝える。
+Start with Status and Priority; add Horizon (Now / Next / Later) if useful. Use a Table for overview and a Board for execution. Add dates or Iterations only when justified; never invent deadlines to populate a Roadmap. Use parent Issues for the overall Roadmap and execution units for daily work. If view configuration is unsupported, use available views and disclose what is unconfigured.
 
-状態は `backlog → ready → implementing → reviewing → merge_ready → awaiting_user（user時）→ done`。`blocked`・`cancelled`を区別する。既存Statusが粗い場合は必要な詳細フィールドと組み合わせ、対応を管理用Issueに記録する。Project未使用時、または権限・障害で利用不能となり代替を宣言した期間だけ、Issue管理欄を状態の正本にする。利用不能な既存Projectは更新停止中であると管理用Issueに明記し、古い表示を現在状態として扱わない。PR作成やレビュー開始だけでdoneにしない。自動化がIssue close等で状態を変更しても、マージ・受け入れ条件達成を確認する。中止を完了と誤認しない。
+Use `backlog -> ready -> implementing -> reviewing -> merge_ready -> awaiting_user (user mode) -> done`, with separate `blocked` and `cancelled` states. Map coarse existing fields to the necessary detail and record the mapping. Use Issue status fields as authoritative only when no Project is used or during an explicitly declared outage/permission fallback. Mark an unavailable Project as stale in the coordination Issue. PR creation, review start, and automatic Issue closure are not sufficient evidence of completion: verify merge and acceptance. Cancellation is not completion.
 
-Milestoneは「MVP」「実運用開始」「v1.0」など明確な到達点がある場合に作る。説明には達成条件を記し、期限は根拠がある場合だけ設定する。リポジトリ単位の到達目標として扱い、複数リポジトリ全体はProjectで見渡す。単なる担当や状態をMilestoneにしない。Issue・PRを同じ成果の重複指標として扱わず、完了率だけで達成と判断しない。項目の除外・先送りで目標が変わるときは理由と未達部分を記録し、全条件を確認して閉じる。
+Create Milestones for concrete targets such as an MVP, operational rollout, or a release. Record completion criteria and only justified due dates. Milestones are repository-level targets; use a Project for cross-repository coordination. Do not use Milestones as assignees or statuses. Avoid counting both Issues and PRs as separate accomplishments or relying only on completion percentages. Explain removed/deferred work and any changed target; close only when all criteria are met.
 
-## 親子・依存関係
+## Parent/child relationships and dependencies
 
-包含はSub-issues、先行完了が必要な関係はIssue dependenciesで表す。両者を混同しない。循環依存は分割・順序変更してから割り当てる。親の全体条件と子の条件はIssue本文に置く。依存先Issueがclosedでも中止・未達なら着手可能としない。
+Use Sub-issues for containment and Issue dependencies for prerequisites. Resolve dependency cycles through splitting or sequencing before assignment. Keep parent and child acceptance criteria in their own Issue bodies. A closed prerequisite that was cancelled or did not meet its criteria does not unblock dependent work.
 
-CLI/APIの利用可能な操作と権限を確認し、存在しないオプションや成功を推定しない。Projectsの権限不足はrepoの認証切れと区別する。権限を勝手に拡張せず、Project利用が必須なら必要な権限と操作をユーザーへ説明して認可を依頼する。使えない機能は、管理用Issueに理由と代替先を明記し、関係をIssueリンク、状態をIssue管理欄、議論をIssueコメントで代替する。別Projectを作って権限問題を回避しない。元機能へ移行する際は実際の状態を照合し、旧管理欄を参照リンクに置き換えて二重管理を解消する。
+Check actual CLI/API capabilities and permissions; do not invent flags or assume success. Distinguish Project permission failures from repository authentication failures. Do not expand permissions automatically. If a Project is essential, explain the needed permission and operation to the user. Otherwise record the limitation and fallback: Issue links for relationships, Issue fields for status, and comments for decisions. Do not create another Project to bypass permissions. When restoring the original feature, reconcile actual state and replace fallback fields with references so there is only one authoritative record.
 
 ## Discussions
 
-複数Issueに影響する設計判断、方針の比較、後から参照する必要のある大きな判断に使う。単一Issueの小さな仕様補完はコメントで足りる。既存Discussionとカテゴリを再利用し、不要なカテゴリを増やさない。投稿は依頼で許可された範囲で行い、作成・更新の許可を新たな相手へのメンションや通知依頼の許可とみなさない。
+Use Discussions for decisions affecting multiple Issues, comparisons, and durable design rationale. A comment is enough for a small single-Issue clarification. Reuse existing discussions and categories. Posting authorization does not authorize new mentions or notification requests to other people.
 
-記録するのは、論点、関連Issue、選択肢とトレードオフ、Architectの推奨案、判断者、現在の結論（未決/決定/置換済み）。決定後は理由・影響・関連タスクを残す。Discussionの作成自体はユーザー待ちを意味しない。委任範囲内はArchitectが決定し、ユーザーの意図が必要な判断だけ確認する。投票結果やAnswer指定をユーザーの承認の代わりにしない。
+Record the question, related Issues, options and tradeoffs, Architect recommendation, decision owner, and conclusion (pending/decided/superseded). After a decision, record its reasons, impact, and resulting tasks. Creating a Discussion does not itself require waiting for the user. Decide within delegated authority; ask only where user intent is required. Votes or an accepted answer are not a substitute for user approval.
 
-作業を阻む未決事項は関連IssueをblockedにしてDiscussionへリンクする。独立した調査・判断作業が必要なら判断用Issueを作り、依存関係で追跡する。DiscussionだけにTODOを置かない。決定が作業を生む場合はIssueを作成・更新し、相互リンクする。変更された結論は履歴として残し、新しい決定へリンクする。
+Mark blocked Issues and link the unresolved decision. Create a decision task when independent investigation is needed, and track the dependency. Do not leave tasks only in Discussions. Link resulting Issues and replacement decisions, preserving prior rationale.
 
-## 再開と整合性
+## Resume and reconcile
 
-管理用Issueから正本Projectの未完了項目、対象Issue・PR、必要な判断記録だけを読む。Projectは計画、Issue/PRは実際の完了証拠として照合し、外部での更新・マージ・中止を反映する。全Discussionや過去会話を読み直さない。更新が途中で失敗した場合は未反映箇所を管理用Issueへ記録し、再取得して差分だけ修復する。書き込み不能ならユーザーへ未保存と報告する。
+From the coordination Issue, read unfinished Project items, relevant Issues/PRs, and needed decisions. Compare planned state with actual completion evidence and reflect outside updates, merges, or cancellations. Do not reread every Discussion or old conversation. After a partial update failure, record what remains unapplied, refetch, and repair only the missing changes. Report unsaved state if writing is unavailable.
 
-以前の担当が同じセッションで生存するか確認する。新規担当はIssueと証拠から履歴なしで起動するが、以前の書き込み担当や外部操作が動いている可能性があれば停止・引き継ぎ確認まで二重実装しない。マージ判断者は保存済み設定を維持し、記録がなければユーザー指示、さらに不明ならarchitectを宣言する。終了時に管理用Issue・Projectのリンク、残件と次の行動を伝える。
+Check whether earlier workers remain active. Start new workers from Issue records and evidence with fresh context, but do not duplicate implementation while an old worker or external write may still be running. Verify cessation and handoff first. Preserve the saved merge decision setting; if absent, use the user's instruction or announce the default `architect`. End with coordination/Project links, remaining work, and the next action.
 
-## 設計・受け入れ条件の変更
+## Design and acceptance changes
 
-実装者・レビュアーから、抜け漏れの内容、上位目的への影響、根拠、修正案を短く受け取る。Architectは依頼範囲内で次を判断する。
+Receive a concise description of the gap, impact on the goal, evidence, and proposed fix. Within the user's scope:
 
-- 元の目的の達成に必要な補完は既存Issueの設計・条件を修正する。独立に受け入れ可能な作業は関連するフォローアップIssueへ分割し、依存関係と完了への影響を示す。
-- ユーザーの意図で正解が変わる仕様や当初範囲を超える変更は確認する。改善案を必須条件へ勝手に昇格させず、独立して進められる範囲は続行する。
-- 未達条件を消して完了扱いにしない。必要な補完を分割しただけで元の目的を達成したことにしない。マージ後に発見した場合は関連Issue/PRをリンクし、未達の元Issueを再開するかフォローアップを作り、親の完了判定も見直す。
+- Amend an existing Issue when clarification is necessary to meet its original goal. Split independently acceptable work into linked tasks and record dependencies and completion impact.
+- Ask when correctness depends on user intent or the change expands scope. Do not silently promote optional improvements to required acceptance criteria. Continue independent work.
+- Never remove unmet criteria to declare completion. Splitting a missing requirement does not satisfy the original goal. For discoveries after merge, reopen the relevant Issue or create linked follow-up work and reassess the parent's completion.
 
-各タスクIssueに単純な `Spec revision: N` を持たせ、設計・受け入れ条件の実質的変更時だけ増やす。初回は1とする。状態更新や誤字修正では増やさない。親の設計変更が子の判定に影響する場合は、影響する子の仕様版にも反映する。
+Give each task a simple `Spec revision: N`, starting at 1. Increment only for material design or acceptance changes, not typos or progress updates. Propagate a parent change to affected child revisions.
 
-変更前後と判断理由をIssueコメントに保存する。横断的な判断はDiscussionを使い、Issueには決定要約とDiscussionへのリンクを残す。本文を現在の仕様へ更新する。実装担当・レビュー担当に新しい版、変更要点、判断記録のURLを送り、影響する作業だけを止めるか戻す。仕様変更で既存のmerge_readyを失効させ、新しい版への適合を再判定させる。コードを変更しない場合も同様。依存するIssueの状態・条件も同期する。
+Record before/after and rationale in an Issue comment. Use a Discussion for cross-task decisions and link its conclusion from the Issue. Update the body to the current specification. Send affected workers the new revision, change summary, and decision link. Invalidate existing `merge_ready` verdicts and reassess the new revision even if code is unchanged. Reconcile dependent Issues' state and criteria.

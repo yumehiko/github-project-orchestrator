@@ -1,4 +1,4 @@
 interface:
   display_name: "GitHub Project Orchestrator"
-  short_description: "GitHubの長期タスクを管理し、実装とレビューを独立エージェントへ委譲"
-  default_prompt: "$github-project-orchestrator このリポジトリの対象Issueを整理し、実装・レビューをサブエージェントに委譲して進めてください。マージ判断はArchitectに任せます。"
+  short_description: "Coordinate GitHub tasks with implementation and review agents"
+  default_prompt: "$github-project-orchestrator Organize this repository's target Issues and delegate implementation and independent review; let the Architect decide when to merge."

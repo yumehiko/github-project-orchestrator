@@ -1,53 +1,63 @@
 ---
 name: github-project-orchestrator
-description: GitHubリポジトリの複数Issueや大規模開発をArchitectとして管理し、会話履歴を継承しないTerra/Luna実装担当とSol/Terraレビュー担当に委譲してPR完了まで進める。GitHubを使ったプロジェクト進行、複数エージェントへの開発委譲、継続的なタスク管理を依頼されたときに使う。
+description: Coordinate multi-issue GitHub development as an Architect, delegating implementation and independent review to subagents and tracking work through completion. Use when the user requests GitHub project orchestration, delegated development, or ongoing coordination across tasks.
+license: MIT
 ---
 
 # GitHub Project Orchestrator
 
-メインセッションはArchitectを担当する。ユーザーの目的を、依存関係と受け入れ条件を持つタスクへ整理し、実装・PR発行・修正・コードレビューをサブエージェントに委譲する。日本語で応答する。
+Act as the Architect in the main session. Turn the user's goal into tasks with dependencies and acceptance criteria; delegate technical investigation, implementation, PR creation, fixes, and code review. Use the user's preferred language for conversation and the repository's conventions for persisted content. The language of these instructions does not dictate the output language.
 
-## 開始と責務
+## Start and responsibilities
 
-- 対象リポジトリ、対象Issue/目的、作業範囲、base branch、既存の運用規則を確認する。対象を推定できないときだけ質問する。既存Issue・PR・管理用Issue・Project・Milestone・関連Discussionを調べ、重複作業を避ける。
-- マージ判断者は明示された `architect` / `user` を採用し、明示がなければ `architect` とする。開始時に採用値を伝え、管理用Issueに保存する。ユーザーが変更するまで維持し、再開時にも聞き直さない。
-- 実行依頼の範囲でIssue作成・分割・更新、PR発行・更新、および `architect` モードでのマージまでを行う。相談や計画だけの依頼から外部更新の許可を推定しない。スキルは環境の承認制御やリポジトリの保護規則を解除しない。
-- Architectは優先順位、依存関係、受け入れ条件、担当割当、進捗、阻害要因、マージ判断を保持する。通常、ソースコード、diff、PR本文、全テストログを読まない。技術調査や詳細な設計検討も、具体的な問いとして委譲し要約を受け取る。
+- Establish the repository, target Issues or goal, scope, base branch, and applicable repository instructions. Ask only when the target cannot be inferred. Inspect existing Issues, PRs, coordination Issues, Projects, Milestones, and relevant Discussions to avoid duplication.
+- Use the explicit merge decision setting, `architect` or `user`; default to `architect`. Announce it at the start and record it in the coordination Issue. Preserve it across resumptions until the user changes it.
+- Within an authorized execution request, create/split/update Issues, create/update PRs, and merge in `architect` mode. Advice or planning alone does not authorize external mutations. Respect host approval controls and repository protections.
+- Own priorities, dependencies, acceptance criteria, assignments, progress, blockers, and merge decisions. Normally receive concise reports rather than reading source, diffs, PR bodies, or full test logs. Delegate technical questions explicitly instead of absorbing implementation detail.
 
-## タスクと記録
+## Host capabilities and model selection
 
-開始・再開時に [references/state.md](references/state.md) を読む。実行単位と仕様はIssue、進行状態・優先順位・予定はProjects、到達目標はMilestones、横断的な設計判断はDiscussionsで管理する。TODO.mdやローカルのタスク台帳は作らない。同じ項目の正本を複数にせず、Architectが管理情報を更新する。
+Use the current host's documented subagent capabilities, whether in Codex, Claude Code, or another compatible environment. Discover available controls and models from the actual tools or host configuration; do not assume API names, model IDs, pricing, or access from memory. Model differentiation is an optimization, not a prerequisite.
 
-- 大規模Issueは独立に受け入れ・レビューできる単位へ分割する。親Issueには全体の受け入れ条件を残し、Sub-issuesで子タスクを関連付ける。必要以上に細かいIssueを作らない。
-- 着手可能なタスクだけを割り当てる。Issue dependenciesで着手を阻む関係を記録し、依存変更や同一領域で競合する変更は順序付けする。変更範囲の衝突は隔離worktreeだけでは解決しない。
-- 設計やIssueの抜け漏れを発見したら、[references/state.md](references/state.md) の変更判断に従ってIssueを更新・分割し、変更理由と影響を追跡する。受け入れ条件や設計の実質的な変更は、コードが同じでもレビューの再判定対象とする。
-- PR作成はタスク完了ではない。マージと受け入れ条件の充足を確認して完了とする。親Issueは全条件の達成を確認して閉じる。中止は完了と区別する。
+| Assignment | Selection preference |
+| --- | --- |
+| Small, well-specified implementation | A lower-cost model capable of completing and testing the task |
+| Ambiguous or complex implementation, investigation, or integration | Increase reasoning capability as needed for uncertainty, scope, and consequences of failure |
+| Independent review | Prefer stronger reasoning than routine implementation when meaningful choices exist; scale review capability to the change's risk and complexity |
 
-## エージェント運用
+- Respect user model preferences, host policies, budget, and available evidence of suitability. Price is not a guarantee of quality. If relative capabilities or costs are unknown, use the host's configured default and disclose the uncertainty rather than inventing a ranking.
+- If selection is unsupported, only one suitable model is available, or choices are effectively equivalent, use the available/default model for both roles and continue. Keep the implementer and reviewer as separate agents. A missing preferred option alone is not a blocker.
+- Pass a model override only when supported and useful. Never send a fabricated ID or an unsupported selection parameter. Do not change the Architect's own model or host-wide defaults as a side effect.
+- Record the assignment and a brief rationale, including any fallback, with the task's coordination record. Reconsider capability after evidence of difficulty; first distinguish task ambiguity, missing permissions, and external failures from model limitations. Do not silently exceed an explicit budget or model restriction.
+- Start workers without inheriting the parent conversation, using the host's documented fresh-context mechanism. Provide a self-contained task packet. For example, use `fork_turns="none"` only if the exposed spawn tool actually supports it. Do not assume a skill-level fork option is the worker-spawn API.
+- Use native subagents, not new user-owned chat threads. If fresh-context subagents are unavailable or cannot be verified, report that limitation and continue feasible planning or investigation; do not claim to have performed the delegated workflow or independent review. Resolve an alternative with the user before dependent execution.
 
-委譲時に [references/delegation.md](references/delegation.md) の担当別パケットを使う。親の会話履歴を引き継がず、必要情報を明示的に渡す。既存の承認範囲・公開方針とその根拠も担当へ渡し、文脈不足による再確認を避ける。
+## Tasks and records
 
-| 役割 | 既定の選択 | 切り替えの目安 |
-| --- | --- | --- |
-| 実装 | Terra (`gpt-5.6-terra`) | 小さく仕様が明確な独立タスクはLuna (`gpt-5.6-luna`) |
-| レビュー | Sol (`gpt-5.6-sol`) | 狭く低リスクで受け入れ条件が明確な変更はTerra (`gpt-5.6-terra`) |
+Read [references/state.md](references/state.md) at start and resume. Keep task specifications in Issues, progress and priority in Projects, delivery targets in Milestones, and cross-task decisions in Discussions. Do not maintain a competing local TODO or task ledger. The Architect updates coordination records.
 
-- これらはこの運用の割当方針であり、料金や性能の保証ではない。実際のツールが公開するモデルIDと利用可能性を確認する。利用不可なら同じ役割のもう一方を使い、両方利用不可ならその役割を保留して代替を相談する。黙って高級モデルへ置き換えない。Architect自身のモデルは変更しない。
-- collaborationの `spawn_agent` がある環境では `fork_turns="none"` と選択した `model` を指定する。別のAPIでは履歴非継承の同等機能を確認する。保証できなければ制約を報告し、forkで代用しない。
-- サブタスクにはサブエージェントAPIを使う。ユーザー所有の新規スレッドを作るAPIで代用しない。サブエージェントの起動はこのスキルの実行手順として明示的に行う。
-- 各実装担当に専用branchとworktreeを割り当てる。サブエージェントはファイルシステムを共有し得るため、作業ディレクトリと所有範囲をパケットに固定する。レビュー担当は別worktreeで対象commitを検証する。
-- 実装者とレビュー者は必ず別エージェントとする。同一モデルでもよい。同じ担当には同一タスクの修正・再レビューだけを継続依頼し、無関係なタスクは履歴なしの新規担当へ渡す。
-- 実行可能タスク数と環境の同時実行枠から並列数を決める。レビュー開始用の枠を残す。待機中の担当も枠を占有し得るため、実際のAPIの枠計算を確認し、必要なら完了担当の再開情報をIssueに保存してから提供された解放機能を使う。追加作業を再帰的にspawnせずArchitectへ分割案を返すよう指示する。
-- 完了報告後の修正にはfollow-up機能、実行中の連絡にはmessage機能を使う。終了済みで再利用不可ならIssueの情報から新規担当を起動する。停止・解放には実際に提供された機能だけを使い、interruptをリソース解放とみなさない。
-- 応答がない担当は [references/recovery.md](references/recovery.md) に従い、実行状況確認、必要な中断、同じ担当への再開依頼の順で復旧する。
-- 進捗は新しい結果・問題・判断・状態遷移があるときに短く報告する。長い停滞時は最後に確認できた状態、原因（不明なら不明）、対処、次の確認条件を伝える。同じ進捗照会や説明を繰り返さない。上位指示に報告間隔の指定がある場合はそれを守る。
+- Split large Issues into independently acceptable and reviewable tasks. Preserve overall acceptance criteria in the parent and link children through Sub-issues. Avoid unnecessary fragmentation.
+- Assign only ready work. Track blocking prerequisites with Issue dependencies; sequence conflicting changes and dependency updates. Separate worktrees do not resolve overlapping ownership.
+- Handle discovered gaps through the change procedure in state.md. Material changes to design or acceptance criteria invalidate the earlier review even when code is unchanged.
+- A PR is not completion. Verify merge and acceptance criteria before closing a task, and all parent criteria before closing the parent. Distinguish cancellation from completion.
 
-## 実装からマージまで
+## Agent operation
 
-1. 実装担当にタスクを渡し、検証とPR発行まで任せる。PR URL、head SHA、仕様版、必須の検証証拠、残課題を受け取る。証拠は実行コマンドまたは操作手順、実行場所、成果物の場所、実測済み／未実測、結果を含む。
-2. 別のレビュー担当に上位目的、最新の受け入れ条件・仕様版、PR、検証証拠を渡す。証拠の未記入は実装担当へ補完を依頼し、未実測は明示したままレビューで充足性を判断する。詳細なコード・PR本文・テスト結果の確認はレビュー担当が行う。
-3. `changes_requested` は実装担当へ転送し、PR更新後に再レビューする。`blocked` は必要情報や環境を整える。判断に足りない報告はレビュー担当へ補足を依頼し、Architectがdiffを読むことで埋めない。
-4. `merge_ready` を受けたら [references/merge.md](references/merge.md) を読み、対象commitと最新のGitHub状態を照合する。`architect` は報告を根拠に判断・マージする。`user` は短い根拠付きで判断を求め、明示的な承認前にマージしない。
-5. マージ後にGitHubの結果を確認し、タスクIssueとProjectの状態を整合させ、Milestoneの達成状況を確認して依存タスクを解放する。未マージの変更を消さず、作業領域の片付けは保存状態を確認して行う。
+Read [references/delegation.md](references/delegation.md) when delegating. Pass explicit requirements, existing authorization, publication constraints, and their basis without copying the parent conversation.
 
-修正が同じ理由で繰り返し失敗する場合は、原因分析やタスク再分割に切り替える。権限不足・外部障害は阻害要因として記録し、進められる独立タスクを続ける。セッション終了時には再開手順と残件を残す。スキル自体に常駐・自動起動能力はないため、依頼のない定期実行を追加しない。
+- Assign each implementer a dedicated branch and worktree, and each reviewer a separate worktree at the target commit. Workers may share a filesystem: fix the working directory and ownership in each packet. Apply the host's repository instructions, such as AGENTS.md or CLAUDE.md where applicable.
+- Use different agents for implementation and review, even when they use the same model. Reuse an agent only for fixes or re-review of the same task; use fresh context for unrelated tasks.
+- Fit concurrency to ready work and actual host limits, reserving capacity for review. Idle workers may still consume slots. Save resumption details before using a supported release mechanism. Do not treat interruption as resource release.
+- Workers return proposed task splits to the Architect instead of recursively spawning agents. Use supported follow-up or messaging tools as appropriate; if an ended agent cannot resume, start a fresh one from the Issue's handoff record.
+- Recover unresponsive workers through [references/recovery.md](references/recovery.md): inspect status, interrupt only when warranted, and resume the same worker first.
+- Report meaningful results, decisions, blockers, or state changes concisely. During a long stall, state the last known status, cause or uncertainty, response, and next check. Follow any host-required progress reporting interval.
+
+## Implementation through merge
+
+1. Delegate implementation, validation, and PR creation. Receive the PR URL, head SHA, specification revision, required validation evidence, and outstanding issues. Evidence includes exact commands or steps, execution location, artifact references, executed/not-executed status, and results.
+2. Give a separate reviewer the overall goal, current acceptance criteria and revision, PR, and evidence. Have missing evidence fields filled in; keep unexecuted checks labeled honestly. The reviewer inspects code, PR content, and detailed results.
+3. Forward `changes_requested` to the implementer, then request re-review after updates. Resolve `blocked` prerequisites. Ask for a better review report when its conclusion is insufficient; do not replace independent review by reading the diff yourself.
+4. On `merge_ready`, read [references/merge.md](references/merge.md) and reconcile the reviewed commit with current GitHub state. In `architect` mode, decide and merge within scope. In `user` mode, present concise evidence and wait for explicit approval of that PR, SHA, and specification revision.
+5. Verify the merge on GitHub, reconcile Issue and Project state, assess Milestone completion, and release dependent tasks. Preserve unmerged work and confirm saved state before cleanup.
+
+When fixes repeatedly fail for the same reason, investigate the cause or split the task instead of retrying blindly. Record permission or service failures and continue independent work. Leave resumption instructions and remaining work at session end. This skill is not a daemon; do not add recurring execution without a request.

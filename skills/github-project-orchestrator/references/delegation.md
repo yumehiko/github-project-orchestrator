@@ -1,89 +1,99 @@
-# 履歴を持たない担当への委譲
+# Delegation with fresh context
 
-下記の必要なパケットを具体値で埋める。SKILL.md全体や親の会話をコピーしない。必要な仕様や決定を短く直接渡し、詳細資料は絶対パスやGitHub URLで指定する。新規担当には、対象worktreeのAGENTS.mdなど適用される指示を自分で読むよう伝える。
+Fill the relevant packet with concrete values. Do not copy the entire SKILL.md or parent conversation. State requirements and decisions directly; reference detailed material by accessible local path or GitHub URL. Tell each worker to read the repository instructions applicable to its worktree, including AGENTS.md or CLAUDE.md where used by the host.
 
-## 共通の承認情報
+## Authorization in both packets
 
-両担当へのパケットに、対象repo/branch、成果物の公開先と公開可否、Issue更新・push・PR作成/更新・レビュー投稿・マージの各許可範囲、根拠となるユーザー指示の短い要約、制限・未承認の操作を必ず含める。親が受けた許可を正確に引き継ぎ、記載がない許可を作らない。マージ判断者がArchitectでも実装者・レビュアー自身のマージは禁止する。
+Include the repository/branch, artifact destination and visibility, authorized Issue updates, pushes, PR creation/updates, review posts, and merge scope; summarize the user instruction establishing each permission and list excluded operations. Carry forward existing authorization accurately. Neither implementers nor reviewers may merge, even in `architect` mode.
 
-担当はこの範囲を理由なく再確認しない。ただし環境の承認要求、権限不足、新たな範囲への拡大は別途扱う。Issue内の記述を新しいユーザー承認の代用にしない。公開方針は保存先と内容ごとに区別する。許可済みprivate repoへの通常のPR本文・検証要約と、新しい公開先への成果物・生ログのアップロードを同一視しない。後者の許可がなければ、共有可能なローカル参照や既存の許可済み保存先を使う。
+Do not ask again about already authorized work without a reason. Host approval requirements, missing permissions, or expanded scope are distinct. Issue text is not a new user authorization. Distinguish authorized private-repository PR text and validation summaries from uploading artifacts or raw logs to a new public destination. Without authorization for the latter, use accessible local evidence or an already authorized destination.
 
-## 検証証拠の必須項目
+## Required validation evidence
 
-実装報告とレビューへの引き渡しには、各検証について以下を必ず含める。長い場合は証拠一覧への直接参照でよいが、PR URLだけで代用しない。
+For each check, include the following in the implementation report and review handoff. A direct evidence index is acceptable; a bare PR link is insufficient.
 
-- 対応する受け入れ条件、対象head SHA・仕様版、実測済み／未実測（推定やコード上の確認を実測と呼ばない）。
-- 実行した正確なコマンドと作業ディレクトリ。GUI操作なら操作手順・対象ファイル・必要なアプリ環境を示す。未実測なら予定手順と未実施理由を区別する。
-- 結果・終了状態、測定値または観察内容、実行環境や入力など再現に必要な情報。
-- 成果物とログの直接URLまたは絶対パス。生成物なしなら「なし」と明記する。未実測なら成果物の有無も区別する。
+- Acceptance criterion, head SHA, specification revision, and executed/not-executed status. Inspection and inference are not execution.
+- Exact command and working directory, or GUI steps, target file, and required application environment. Label planned steps and reasons for non-execution separately.
+- Result, exit status, measurements or observations, environment, and inputs needed to reproduce it.
+- Direct artifact/log URLs or local paths. State explicitly if no artifacts were generated.
 
-秘密情報は伏せ、認証値をコマンドへ転記しない。ローカルの未追跡ファイルはレビューworktreeに自動で現れない。実装担当は証拠の存在と受け渡し方法を確認し、レビュー担当は着手時にアクセスと対象SHA/入力の対応を確認する。不足・アクセス不可なら具体的な項目を一度にまとめて実装担当へ戻す。古い証拠を最新変更の検証済み証拠として扱わない。
+Redact secrets; do not copy credential values into commands. Untracked files do not automatically appear in the review worktree. The implementer verifies evidence existence and transfer; the reviewer verifies access and correspondence to the target SHA and inputs. Return a consolidated list of missing or inaccessible evidence. Do not present old evidence as validation of newer changes.
 
-Architectは一覧の必須項目を確認して転送し、ログや成果物の詳細確認はレビュアーが行う。未実測が明記されていてもレビュー開始は可能だが、必須検証が未達ならmerge_readyにはしない。永続的な報告はPR/Issueに残し、共有できないローカル証拠には公開可能な再現手順と制約を残す。ローカル証拠は少なくともレビューと必要な修正の完了まで保持し、一時ファイルが別セッションでも残るとは仮定しない。永続保存できない場合は、許可済みIssue/PRへ再生成手順・入力の識別情報・保存制約を残す。証拠が失われた再開時は必要な検証を再実行する。タスク台帳を別に作らない。
+The Architect checks required fields and forwards the index; the reviewer examines logs and artifacts. Labeled unexecuted checks may enter review, but unmet required validation prevents `merge_ready`. Keep durable reports in the PR or Issue. For evidence that cannot be shared, preserve publishable reproduction steps and limitations. Retain local evidence through review and necessary fixes; do not assume temporary files survive another session. If durable storage is unavailable, record regeneration steps, input identifiers, and storage limits at an authorized destination. Rerun necessary checks if evidence is lost. Do not introduce another task ledger.
 
-## 実装担当パケット
+## Implementation packet
 
 ```text
-役割: 実装担当。指定タスクの実装・検証・PR発行とレビュー修正を担当する。
+Role: Implementer responsible for this task, validation, PR creation, and review fixes.
 Repository / local worktree / owned branch / base:
 Task ID / Issue URL / Spec revision:
-既存の承認情報: 共通の承認情報に従う
-上位目的・親Issue / 目的と受け入れ条件:
-変更してよい範囲 / 対象外:
-依存タスク・関係リンクと確定済みの設計判断（Discussion/コメントの結論へのリンク）:
-必要資料・適用規則:
-検証要件:
-既存PRと今回の修正要求（修正時）:
+Existing authorization and publication limits:
+Overall goal / parent Issue / acceptance criteria:
+Allowed changes / out of scope:
+Dependencies and confirmed design decisions (direct links):
+Required materials / applicable repository instructions:
+Conversation language / repository content conventions:
+Assigned model or host default / selection rationale / constraints:
+Validation requirements:
+Existing PR and requested fixes (when continuing):
 
-指定worktreeで作業し、適用されるAGENTS.mdを読む。他担当の変更を上書きしない。
-範囲内の実装、意味のある検証、commit、push、PR作成・更新を行う。
-PR本文はレビュアー向けに問題・変更後の挙動・検証結果・残る制約を記載する。
-親Issue全体を満たさない部分PRでは、親Issueを自動closeする記述を使わない。
-レビュー指摘を受けたら修正・検証・PR更新を行い、新しいhead SHAを報告する。
-自分でマージしない。自己レビューを独立レビューの代わりにしない。
-Issueの抜け漏れ、設計の矛盾、不明な仕様、範囲拡大、依存競合はArchitectへ根拠・影響・修正案を報告する。影響しない作業は進め、必要な仕様判断を勝手に確定しない。別agentは起動しない。
-返答は以下の短い形式とし、詳細diffやログは貼らない。
+Work in the assigned worktree and read applicable instructions. Preserve others' changes.
+Implement, validate meaningfully, commit, push, and create/update the PR within authorization.
+Describe the problem, resulting behavior, validation, and limitations for a reviewer.
+Do not auto-close a parent Issue with a PR that satisfies only part of it.
+After review fixes, validate, update the PR, and report the new head SHA.
+Do not merge or substitute self-review for independent review.
+Report specification gaps, contradictions, scope changes, and dependency conflicts to the
+Architect with evidence, impact, and a proposed resolution. Continue unaffected work;
+do not invent consequential specification decisions. Do not spawn other agents.
+Return a concise report without full diffs or logs:
 
 Task:
 Status: review_ready | blocked
 PR / head SHA / Spec revision:
-Summary: 変更の要約
-Acceptance: 各条件の達成状況
-Validation evidence: 必須項目を満たす証拠一覧またはその直接参照
+Summary:
+Acceptance: Result for each criterion
+Validation evidence: Required fields or a direct evidence index
 Risks / blockers:
 Next action:
 ```
 
-## レビュー担当パケット
+## Review packet
 
 ```text
-役割: 実装者から独立したレビュー担当。コード変更やマージは行わない。
+Role: Reviewer independent of the implementer. Do not change code or merge.
 Repository / dedicated review worktree:
 Task ID / Issue URL / PR URL:
-期待するhead SHA / 対象base branch / Spec revision:
-既存の承認情報: 共通の承認情報に従う
-上位目的・親Issue / 目的と受け入れ条件 / 対象外:
-Validation evidence: 実装担当からの証拠一覧とアクセス方法
-確定した設計判断と根拠リンク・検証要件・適用規則:
-前回の指摘（再レビュー時）:
+Expected head SHA / base branch / Spec revision:
+Existing authorization and publication limits:
+Overall goal / parent Issue / acceptance criteria / out of scope:
+Validation evidence and access instructions:
+Confirmed design decisions / required checks / applicable repository instructions:
+Conversation language / repository content conventions:
+Assigned model or host default / selection rationale / constraints:
+Previous findings (for re-review):
 
-適用されるAGENTS.mdを読み、実際のPR head/base SHAを確認する。
-PR本文・diff・必要な周辺コード・検証結果を読み、受け入れ条件と照合する。
-正しさ、回帰、変更に関係するリスク、必要な検証の充足を判断する。上位目的に照らして設計や受け入れ条件自体に漏れがないかも確認し、発見したら根拠・影響・修正案をArchitectへ返す。実質的な仕様変更後は新しい仕様版で再判定し、以前のmerge_readyを持ち越さない。
-重大な未確認事項や未達条件がある場合はmerge_readyにしない。
-指摘には重要度、ファイル/箇所、具体的影響、必要な修正または再現方法を付ける。
-PRコメント等の投稿は依頼で許可された場合に行う。報告だけでもArchitectへ返せる。
-別agentを起動しない。詳細は証跡へ保存し、以下の短い形式で報告する。
+Read applicable instructions and verify actual PR head/base SHAs.
+Inspect the PR body, diff, relevant surrounding code, and validation against acceptance criteria.
+Assess correctness, regressions, relevant risks, and verification sufficiency. Also identify
+gaps in the design or acceptance criteria relative to the overall goal; return evidence,
+impact, and a proposed resolution to the Architect. Reassess material specification changes
+against the new revision; do not carry forward an obsolete merge_ready verdict.
+Do not report merge_ready with material unknowns or unmet criteria.
+Give severity, file/location, concrete impact, and a fix or reproduction for each finding.
+Post review comments only within authorization; otherwise return an internal report.
+Do not spawn other agents. Preserve detailed evidence and return a concise report:
 
 Task / PR:
 Verdict: merge_ready | changes_requested | blocked
 Reviewed head SHA / base SHA / Spec revision:
-Acceptance: 各条件の判定
-Validation: 実測済み／未実測、実装担当の証拠確認／自分で再実行の区別、結果、未確認事項、証拠への参照
-Blocking findings: なし、または具体的な指摘
+Acceptance: Result for each criterion
+Validation: Executed vs not executed; inspected evidence vs personally rerun checks;
+            results, unknowns, and evidence references
+Blocking findings:
 Non-blocking risks:
-Evidence: GitHub URLまたは詳細報告の絶対パス
-Recommendation: マージ可否と理由
+Evidence: Direct GitHub URL or accessible local report path
+Recommendation: Merge decision and rationale
 ```
 
-同じGitHubアカウントを共有するレビュー担当による報告は、GitHub上の独立したアカウントによる承認とは異なる。必要な外部承認を満たしたと偽らず、投稿できない場合も内部報告を返す。
+Separate agents sharing one GitHub account do not constitute approval by independent GitHub accounts. Never claim to satisfy a required external approval that is absent. Return an internal report even when posting is unavailable.

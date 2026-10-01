@@ -1,19 +1,19 @@
-# レビュー報告に基づくマージ
+# Merge from independent review evidence
 
-Architectはコード・diff・PR本文を読み直さず、担当の報告とGitHubの機械的状態を照合して判断する。
+The Architect reconciles the worker's report with current GitHub state rather than rereading source, diffs, or PR bodies.
 
-マージ前に確認する情報:
+Before merging, verify:
 
-- 報告のrepository/PRが対象と一致し、判定が `merge_ready` で、受け入れ条件・検証・残リスクが明確である。
-- 現在のIssueの仕様版がレビュー報告の版と一致する。設計・受け入れ条件が実質的に変更されていれば、SHAが同じでも再判定を依頼する。単なる進捗欄更新は対象外。
-- 現在のPRがopenかつ非draftで、base branchが意図どおりである。
-- 現在のhead SHAがレビュー済みSHAと一致する。更新されていれば承認を持ち越さず再レビューする。
-- base SHAがレビュー時から変わっていれば、レビュー担当へ影響確認と必要な追加検証を依頼する。Architectが差分を読む必要はない。
-- 必須チェック、必要なGitHub承認、競合、マージ可否を確認する。判定がpending/unknownなら待機・再取得し、成功扱いにしない。必須チェックが設定されていない場合はレビュー報告の検証証跡で判断する。
+- The report identifies the intended repository and PR, returns `merge_ready`, and clearly addresses acceptance, validation, and remaining risks.
+- The current Issue specification revision matches the report. Material design or acceptance changes require reassessment even with an unchanged SHA; routine progress updates do not.
+- The PR is open, is not a draft, and targets the intended base branch.
+- The current head SHA is the reviewed SHA. A changed head requires re-review.
+- If the base SHA changed after review, the reviewer has assessed the impact and performed any necessary additional validation.
+- Required checks, required GitHub approvals, conflicts, and mergeability satisfy repository rules. Pending or unknown is not success. If no checks are configured, assess the review's validation evidence.
 
-`architect` モードでは、上記を満たした報告に基づきArchitectがマージする。都度ユーザーの許可を求め直さない。`user` モードではPRリンク・対象SHA・仕様版・レビュー結論・検証要約・残リスクを提示し、そのPR・SHA・仕様版に対する明示的な承認を待つ。承認後も最新状態を照合する。対象headまたは仕様版が変わったら再レビューと再承認が必要。
+In `architect` mode, merge based on a report meeting these requirements within existing authorization, without asking again each time. In `user` mode, present the PR link, SHA, specification revision, verdict, validation summary, and remaining risks. Wait for explicit approval of that PR/SHA/revision, then recheck current state. A changed head or specification requires re-review and renewed approval.
 
-GitHub CLI利用時の例（実環境のhelpで対応オプションを確認する）:
+Example GitHub CLI operations; verify supported options with the installed CLI's help:
 
 ```sh
 gh pr view NUMBER --repo OWNER/REPO --json number,url,state,isDraft,baseRefName,baseRefOid,headRefOid,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup
@@ -22,8 +22,8 @@ gh pr merge NUMBER --repo OWNER/REPO --squash --match-head-commit REVIEWED_SHA
 gh pr view NUMBER --repo OWNER/REPO --json state,mergedAt,mergeCommit
 ```
 
-マージ方式はリポジトリの規則と有効な方式に従う。上のsquashは例。head一致条件を付けられる方法を使い、古いレビューのまま更新後commitをマージする競合を避ける。merge queueが必要なら通常のキューを利用し、投入はdoneにせず実際のマージまで確認する。`--admin`等で保護規則を迂回しない。競合解消やbase取り込みは実装担当へ戻し、更新後のレビューを受ける。
+Use the repository's permitted merge method; squash above is only an example. Use an operation conditioned on the reviewed head SHA to avoid merging newer code under a stale review. Follow the normal merge queue if required, and verify actual merge rather than treating queue admission as done. Do not bypass protections with `--admin` or equivalent. Return conflict resolution and base integration to the implementer, then obtain an updated review.
 
-マージ操作が失敗・タイムアウトした場合はPR状態を再取得してから次を判断する。成功を確認するまでIssueを完了にしない。失敗原因を解消せず反復しない。親Issueの一部だけを実装したPRで親全体を閉じない。
+After failure or timeout, refetch PR state before deciding what to do next. Do not mark Issues complete until merge is confirmed or retry without addressing the cause. A partial implementation must not close the entire parent Issue.
 
-GitHub CLIの認証確認はサンドボックス内の `gh auth status` だけで判断しない。DNS失敗は認証切れではない。ネットワーク利用を許可した実行で `gh auth status --json hosts` を再確認し、それでも認証エラーの場合だけ `gh auth login` を依頼する。CLIで複数行の本文を渡す場合は一時ファイルと `--body-file` を使う。
+Do not infer GitHub authentication failure solely from sandboxed `gh auth status`. DNS failures are not expired credentials. Recheck `gh auth status --json hosts` with network access permitted by the host; request `gh auth login` only if that check establishes an authentication error. If network access cannot be obtained, report connectivity as unresolved. For multiline CLI bodies, use a temporary file and `--body-file`.

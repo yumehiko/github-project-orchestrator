@@ -1,15 +1,15 @@
-# 応答がない担当の復旧
+# Recover an unresponsive worker
 
-## 確認のきっかけ
+## When to inspect
 
-委譲時に長時間操作の予想所要時間が分かれば、次の確認時点を決める。不明なら最後の有意な進捗から5分を初回確認の目安にする。これは状態確認の目安であり、自動中断の期限ではない。エラーや停止通知があれば早めに確認する。ツール呼び出し中にmessageが配信されないこともあるため、返信の有無だけで停止と判断しない。
+If a long operation's expected duration is known, choose a check time when delegating. Otherwise, about five minutes after the last meaningful progress is an initial inspection guideline, not an automatic interruption deadline. Inspect sooner on an error or stopped notification. Messages may be delayed during tool execution; lack of a reply alone does not establish a stall.
 
-## 確認 → 中断 → 同じ担当へ再開
+## Inspect, interrupt if warranted, resume the same worker
 
-1. 利用可能なagent状態、実行中ツール/プロセス、最後の出力、成果物更新を調べる。必要なら一度だけ担当へ、現在の操作・進捗・待ち条件・保存済み成果を問い合わせる。
-2. 進捗がある、想定時間内の処理中、ユーザー承認待ちなら中断しない。待ち条件に応じた次の確認を設定する。確認情報が取れないだけなら「停止未確認」として扱い、同じ書き込み作業を別担当へ渡さない。
-3. 想定時間を過ぎ、出力等も進まず停止が疑われる場合は、対象操作と保存状態を特定して提供された機能で担当を中断する。中断がアプリ操作や子プロセスまで止めたとは仮定しない。未保存ドキュメントを失うアプリ強制終了などは通常の復旧に含めない。
-4. 同じ担当へ、最後の確定状態、未完了操作、Issue/PR、仕様版、証拠の場所、既存の承認範囲を渡して再開を依頼する。最初に元のツール/外部操作が実行中か、完了済みか、未実行かを確認させる。push、PR作成、ファイル保存等の結果が不明な操作は、現在状態を照合してから未完了分だけ実行する。まだ動いていれば監視を継続し、重ねて実行しない。
-5. 同じ担当が再利用不能なら、旧担当と外部の書き込み操作が停止したこと、変更が保存されたことを確認してから、履歴なしの新規担当へ渡す。確認できなければ該当タスクをblockedにし、他の独立タスクを進める。
+1. Inspect available agent state, active tools/processes, recent output, and artifact updates. If needed, ask the worker once for its current operation, progress, wait condition, and saved results.
+2. Do not interrupt work that is progressing, still within expected duration, or waiting for approval. Choose the next check from the wait condition. If status is unavailable, record the stop state as unconfirmed and do not assign the same write to another worker.
+3. If an operation exceeds expectations without progress and appears stalled, identify the operation and saved state, then use the host's supported interruption mechanism. Do not assume this stops application operations or child processes. Force-quitting an application with unsaved documents is not routine recovery.
+4. Resume the same worker with the last confirmed state, unfinished operations, Issue/PR, specification revision, evidence location, and existing authorization. First determine whether the original operation is still running, completed, or never executed. Reconcile uncertain pushes, PR creation, and saves before executing only the remaining work. If still running, monitor rather than duplicate it.
+5. If the worker cannot be reused, verify that the old worker and external writes have stopped and that changes are saved before handing off to a fresh-context worker. If verification is impossible, mark that task blocked and continue independent work.
 
-同じ原因で一度復旧して再び停止したら、同じ中断・再実行を繰り返さない。原因調査、別手順、タスク分割に切り替える。必要な操作が使えない場合も制約と必要な対応を報告する。復旧の原因・措置・結果をIssueコメントに残し、現在の状態は正本Project（未使用時はIssue管理欄）、次の行動はIssueの再開欄へ反映する。公開先にプロセスIDやローカルパスを載せない。
+After one recovery, if the same cause recurs, switch to diagnosis, another approach, or task splitting instead of repeating interruption and retry. Report limitations when required controls are unavailable. Record cause, action, and result in an Issue comment; update current state in the authoritative Project (or declared Issue fallback), and next action in the resume record. Do not publish process IDs or local paths.
