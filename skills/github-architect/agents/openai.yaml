@@ -1,4 +1,0 @@
-interface:
-  display_name: "GitHub Architect"
-  short_description: "GitHubの長期タスクを管理し、実装とレビューを独立エージェントへ委譲"
-  default_prompt: "$github-architect このリポジトリの対象Issueを整理し、実装・レビューをサブエージェントに委譲して進めてください。マージ判断はArchitectに任せます。"

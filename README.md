@@ -1,11 +1,11 @@
-# GitHub Architect
+# GitHub Project Orchestrator
 
-GitHubで長期タスクを管理し、実装とレビューを独立したサブエージェントへ委譲する個人用Codexスキル。
+GitHubでタスクと進捗を管理し、実装・レビューを独立したエージェントに委譲して、開発を完了まで進めるCodexスキル。
 
 ## 使う
 
 ```text
-$github-architect このリポジトリの対象Issueを整理し、実装とレビューを委譲して完了まで進めて。
+$github-project-orchestrator このリポジトリの対象Issueを整理し、実装とレビューを委譲して完了まで進めて。
 ```
 
 マージ判断は既定でArchitect。ユーザー判断にする場合は開始時に指定する。
@@ -21,14 +21,14 @@ $github-architect このリポジトリの対象Issueを整理し、実装とレ
 
 ## 配置と更新
 
-編集元はこのリポジトリの `skills/github-architect/`。インストール先の `~/.codex/skills/github-architect/` は実行用コピーとし、直接編集しない。
+編集元はこのリポジトリの `skills/github-project-orchestrator/`。インストール先の `~/.codex/skills/github-project-orchestrator/` は実行用コピーとし、直接編集しない。
 
 リポジトリルートで以下を実行する（配置先への書き込み許可が必要な環境では承認を受ける）。
 
 ```sh
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/github-architect"
-cp -R skills/github-architect/. "${CODEX_HOME:-$HOME/.codex}/skills/github-architect/"
-diff -r skills/github-architect "${CODEX_HOME:-$HOME/.codex}/skills/github-architect"
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/github-project-orchestrator"
+cp -R skills/github-project-orchestrator/. "${CODEX_HOME:-$HOME/.codex}/skills/github-project-orchestrator/"
+diff -r skills/github-project-orchestrator "${CODEX_HOME:-$HOME/.codex}/skills/github-project-orchestrator"
 ```
 
 削除したファイルはコピーでは消えないため、差分に残った旧ファイルは用途を確認して整理する。別環境ではこのprivateリポジトリをcloneしてから同じ配置手順を使う。

@@ -1,9 +1,9 @@
 ---
-name: github-architect
-description: GitHubリポジトリの複数Issueや大規模開発をArchitectとして管理し、会話履歴を継承しないTerra/Luna実装担当とSol/Terraレビュー担当に委譲してPR完了まで進める。Architect方式の開発・継続的なタスク管理を依頼されたときに使う。
+name: github-project-orchestrator
+description: GitHubリポジトリの複数Issueや大規模開発をArchitectとして管理し、会話履歴を継承しないTerra/Luna実装担当とSol/Terraレビュー担当に委譲してPR完了まで進める。GitHubを使ったプロジェクト進行、複数エージェントへの開発委譲、継続的なタスク管理を依頼されたときに使う。
 ---
 
-# GitHub Architect
+# GitHub Project Orchestrator
 
 メインセッションはArchitectを担当する。ユーザーの目的を、依存関係と受け入れ条件を持つタスクへ整理し、実装・PR発行・修正・コードレビューをサブエージェントに委譲する。日本語で応答する。
 
