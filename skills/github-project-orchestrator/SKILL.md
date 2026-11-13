@@ -10,7 +10,7 @@ Act as the Architect in the main session. Turn the user's goal into tasks with d
 
 ## Start and responsibilities
 
-- Establish the repository, target Issues or goal, scope, base branch, and applicable repository instructions. Ask only when the target cannot be inferred. Inspect existing Issues, PRs, coordination Issues, Projects, Milestones, and relevant Discussions to avoid duplication.
+- Establish the repository, target Issues or goal, scope, base branch, and applicable repository instructions. Ask only when the target cannot be inferred. Inspect existing Issues, PRs, coordination Issues, Milestones, and relevant Discussions to avoid duplication. Inspect Projects only when an existing workflow or explicit user request uses them.
 - Use the explicit merge decision setting, `architect` or `user`; default to `architect`. Announce it at the start and record it in the coordination Issue. Preserve it across resumptions until the user changes it.
 - Within an authorized execution request, create/split/update Issues, create/update PRs, and merge in `architect` mode. Advice or planning alone does not authorize external mutations. Respect host approval controls and repository protections.
 - Own priorities, dependencies, acceptance criteria, assignments, progress, blockers, and merge decisions. Normally receive concise reports rather than reading source, diffs, PR bodies, or full test logs. Delegate technical questions explicitly instead of absorbing implementation detail.
@@ -34,12 +34,12 @@ Use the current host's documented subagent capabilities, whether in Codex, Claud
 
 ## Tasks and records
 
-Read [references/state.md](references/state.md) at start and resume. Keep task specifications in Issues, progress and priority in Projects, delivery targets in Milestones, and cross-task decisions in Discussions. Do not maintain a competing local TODO or task ledger. The Architect updates coordination records.
+Read [references/state.md](references/state.md) at start and resume. Use Milestones for roadmap stages and aggregate progress, Issues for executable tasks and, by default, their authoritative state and priority, and PRs for implementation and review evidence. Use Discussions for substantial decisions, not as a generic human-waiting queue. Projects are optional and used only by explicit request or an established repository workflow; do not introduce duplicate state tracking. Do not maintain a competing local TODO or task ledger. The Architect updates coordination records.
 
 - Split large Issues into independently acceptable and reviewable tasks. Preserve overall acceptance criteria in the parent and link children through Sub-issues. Avoid unnecessary fragmentation.
 - Assign only ready work. Track blocking prerequisites with Issue dependencies; sequence conflicting changes and dependency updates. Separate worktrees do not resolve overlapping ownership.
 - Handle discovered gaps through the change procedure in state.md. Material changes to design or acceptance criteria invalidate the earlier review even when code is unchanged.
-- A PR is not completion. Verify merge and acceptance criteria before closing a task, and all parent criteria before closing the parent. Distinguish cancellation from completion.
+- A PR is not completion. For implementation tasks, verify merge and acceptance criteria before closing. For investigation or decision tasks without code changes, verify the promised deliverable and acceptance criteria without requiring a PR. Verify all parent criteria before closing the parent. Distinguish cancellation from completion.
 
 ## Agent operation
 
@@ -58,6 +58,6 @@ Read [references/delegation.md](references/delegation.md) when delegating. Pass 
 2. Give a separate reviewer the overall goal, current acceptance criteria and revision, PR, and evidence. Have missing evidence fields filled in; keep unexecuted checks labeled honestly. The reviewer inspects code, PR content, and detailed results.
 3. Forward `changes_requested` to the implementer, then request re-review after updates. Resolve `blocked` prerequisites. Ask for a better review report when its conclusion is insufficient; do not replace independent review by reading the diff yourself.
 4. On `merge_ready`, read [references/merge.md](references/merge.md) and reconcile the reviewed commit with current GitHub state. In `architect` mode, decide and merge within scope. In `user` mode, present concise evidence and wait for explicit approval of that PR, SHA, and specification revision.
-5. Verify the merge on GitHub, reconcile Issue and Project state, assess Milestone completion, and release dependent tasks. Preserve unmerged work and confirm saved state before cleanup.
+5. Verify the merge on GitHub, update authoritative task state, assess Milestone completion against its criteria, and release dependent tasks. Then complete [references/cleanup.md](references/cleanup.md): sync the canonical checkout and retire this task's temporary worktrees safely. Report any blocked cleanup separately from implementation completion; do not silently leave it for another session.
 
 When fixes repeatedly fail for the same reason, investigate the cause or split the task instead of retrying blindly. Record permission or service failures and continue independent work. Leave resumption instructions and remaining work at session end. This skill is not a daemon; do not add recurring execution without a request.
