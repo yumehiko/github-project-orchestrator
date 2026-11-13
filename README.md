@@ -34,10 +34,11 @@ In Claude Code, use `/github-project-orchestrator` instead of `$github-project-o
 
 ## What it does
 
-- Breaks goals into Issues with acceptance criteria and dependencies, and tracks progress on GitHub.
+- Uses Milestones for roadmap stages, Issues for tasks and progress, and PRs for implementation evidence.
 - Delegates implementation and review to different agents in separate worktrees.
 - Prefers lower-cost models for routine implementation and stronger reasoning for review when available. Works with a single model too.
-- Preserves decisions and handoffs so work can resume later.
+- Uses Discussions for substantial decisions and preserves handoffs for later resumption. Projects are optional.
+- After merging, synchronizes the canonical checkout and safely retires completed task worktrees, preserving uncommitted work and required assets.
 
 Requires Git, authenticated GitHub access, and a host capable of starting subagents without inheriting the parent conversation. Designed for Codex, Claude Code, and compatible hosts; full live workflows have not yet been verified on every host. Conversations follow your preferred language.
 

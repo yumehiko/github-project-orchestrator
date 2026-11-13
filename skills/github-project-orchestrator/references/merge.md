@@ -27,3 +27,7 @@ Use the repository's permitted merge method; squash above is only an example. Us
 After failure or timeout, refetch PR state before deciding what to do next. Do not mark Issues complete until merge is confirmed or retry without addressing the cause. A partial implementation must not close the entire parent Issue.
 
 Do not infer GitHub authentication failure solely from sandboxed `gh auth status`. DNS failures are not expired credentials. Recheck `gh auth status --json hosts` with network access permitted by the host; request `gh auth login` only if that check establishes an authentication error. If network access cannot be obtained, report connectivity as unresolved. For multiline CLI bodies, use a temporary file and `--body-file`.
+
+## Post-merge handoff
+
+Merge confirmation is the start of closeout, not the end. Follow [cleanup.md](cleanup.md) before reporting the working environment clean. Keep implementation acceptance and cleanup status distinct. Do not delete branches as a side effect of the merge command before this check.
